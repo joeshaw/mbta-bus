@@ -1,0 +1,153 @@
+<html>
+  <head>
+    <title>MBTA real-time bus feed Google Maps mashup</title>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+    <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;sensor=false&amp;key=ABQIAAAAH-2YMNuplewSyLBAuM51xhQ7_nmPXc3GnI6m5iy7oUv-chH4TxT-OQBnhlz8oH59nv_dZ_Kjz5SOnw" type="text/javascript"></script>
+  </head>
+  
+  <body>
+    <p>
+      The <a href="http://mbta.com/">MBTA</a> and the Massachusetts 
+      Department of Transportation recently released a 
+      <a href="http://www.eot.state.ma.us/developers/realtime/">trial
+      real-time feed</a> of the locations of MBTA buses on some routes.
+      Right now only the 39, 111, 114, 116, and 117 routes are 
+      available from the MBTA.  I'll add more routes as they're added by 
+      the T.
+    </p>
+    <p>
+      This is a little mashup which takes that data and plots it on 
+      <a href="http://maps.google.com">Google Maps</a>.  Choose a bus 
+      route from the pull down menu below and markers will appear with 
+      the latest locations of its buses.  Red markers are inbound buses,
+      blue markers are outbound buses.  Markers will also update with
+      the latest information every 15 seconds.
+    </p>
+    <p>
+      It was built using <a href="http://appengine.google.com">Google
+      App Engine</a> and is about 50 lines of JavaScript and 50 lines of 
+      Python.  Not bad.
+    </p>
+    <p>
+      If you have any questions, comments, or pretty stylesheets, please 
+      feel free to <a href="mailto:joe@joeshaw.org.removethis">email</a>
+      or <a href="http://twitter.com/?status=@joeshaw%20">tweet</a> them
+      to me.
+    </p>
+    <p>
+      <a href="http://joeshaw.org">Joe Shaw</a>, 14 November 2009
+    </p>
+
+    <select id="option_list">
+      <option value="">Select Route</option>
+    </select>
+    
+    <div id="map_canvas" style="width: 600px; height: 600px"></div>
+
+    <script type="text/javascript">
+      $(document).ready(function() {
+        var map = new GMap2(document.getElementById("map_canvas"));
+        map.setCenter(new GLatLng(42.357778, -71.061667), 12);
+        map.setUIToDefault();
+        
+        var geocoder = new GClientGeocoder();
+
+        var markers = [];
+        var displayed_route = null;
+
+        function update_markers() {
+          route = $("select option:selected").attr("value");
+          
+          if (route == "") {
+            map.clearOverlays();
+            markers = [];
+            displayed_route = null;
+            return;
+          }
+          
+          $.get("/vehiclelocations/?route=" + route,
+            function (xmldoc) {
+              if (route != displayed_route) {
+                map.clearOverlays();
+                
+                kml = new GGeoXml("http://mbta-bus.appspot.com/kml/" + route + ".kml");
+                kml.show();
+                map.addOverlay(kml);
+              } else {
+                for (i = 0, l = markers.length; i < l; i++)
+                  map.removeOverlay(markers[i]);
+                markers = [];
+              }
+              displayed_route = route;
+              
+              $(xmldoc).find("vehicle").each(function() {
+                var vehicle = $(this);
+                var predictable = vehicle.attr('predictable');
+
+                // If a bus isn't marked as predictable, it's probably "off the reservation"
+                if (predictable != "true")
+                  return;
+
+                var latlong = new GLatLng(vehicle.attr('lat'), vehicle.attr('lon'));
+                var direction = vehicle.attr('dirTag');
+                var icon = new GIcon();
+                if (direction == "in")
+                  icon.image = "images/red-dot.png";
+                else
+                  icon.image = "images/blue-dot.png";
+                icon.iconSize = new GSize(32, 32);
+                icon.iconAnchor = new GPoint(16, 32);
+                icon.infoWindowAnchor = new GPoint(16, 0);
+                var placemark = null;
+                geocoder.getLocations(latlong, function(response) {
+                  if (!response || response.Status.code != 200)
+                    return;
+                    
+                  placemark = response.Placemark[0];
+                });
+                var marker = new GMarker(latlong, {icon: icon});
+                GEvent.addListener(marker, "click", function() {
+                  var content = '<h1>Route ' + route + '</h1>'
+                  content += '<p>Bus ' + vehicle.attr('id') + '</p>'
+                  if (direction == "in")
+                    content += "<p>Inbound</p>";
+                  else if (direction == "out")
+                    content += "<p>Outbound</p>";
+                  if (placemark != null) {
+                    content += "<p>" + placemark.address + "</p>"
+                  }
+                  marker.openInfoWindowHtml(content);
+                });
+                markers.push(marker);
+                map.addOverlay(marker);
+              });
+            });
+        }
+        
+        // Update the markers any time the option box is changed, or
+        // every 15 seconds.
+        $("select").change(update_markers);
+        setInterval(update_markers, 15000);
+
+        $.get("/getroutes/", 
+          function(xmldoc) {            
+            $(xmldoc).find("route").each(function () {
+              var route = $(this);
+              $("#option_list").append('<option value="' + route.attr('tag') + '">' + route.attr("title") + "</option>");
+            });
+          });          
+        });
+    </script>
+
+    <script type="text/javascript">
+      var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+      document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+      try {
+        var pageTracker = _gat._getTracker("UA-11603881-1");
+        pageTracker._trackPageview();
+      } catch(err) {}
+    </script>
+  </body>
+</html>

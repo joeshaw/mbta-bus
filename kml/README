@@ -1,3 +1,5 @@
+The short story:
+
 These KML files are originally derived from files on the MassDOT
 web page, here:
 
@@ -6,3 +8,18 @@ web page, here:
 But they have been transformed to contain only the routes for a
 given bus line.
 
+The long story:
+
+(1) Get the MBTA GTFS file from the URL above
+
+(2) Get the Google Transit Data Feed tools from:
+
+    http://code.google.com/p/googletransitdatafeed/
+
+(3) Run python/kmlwriter.py on the GTFS zip file, and after turning
+    your laptop into a furnace it'll output a huge KML file containing
+    all MBTA stops, stations and routes for all its modes of
+    transportation.
+
+(4) Run tools/generate-route-kml.sh <kml file> <route number> to
+    generate the KML file

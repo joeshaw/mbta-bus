@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://earth.google.com/kml/2.1">
+  <Document>
+    <open>1</open>
+<Folder>
+        <name>&lt;b>4&lt;/b></name>
+        <Folder>
+          <name>Patterns</name>
+          <visibility>0</visibility>
+          <Placemark>
+            <name>Pattern 1 (trips: 11)</name>
+            <description>Trips using this pattern (11 in total): 12069099, 12069100, 12069101, 12069102, 12069103, 12069104, 12069105, 12069106, 12069807, 12069853, 12070385</description>
+            <styleUrl>#route_041-1062</styleUrl>
+            <visibility>0</visibility>
+            <LineString>
+              <tessellate>1</tessellate>
+              <coordinates>-71.061290,42.365577 -71.051460,42.366470 -71.051147,42.363976 -71.051094,42.362347 -71.052025,42.359722 -71.053276,42.354603 -71.055242,42.352271 -71.050865,42.350452 -71.044151,42.347260 -71.034454,42.344620 -71.031998,42.345207</coordinates>
+            </LineString>
+          </Placemark><Placemark>
+            <name>Pattern 2 (trips: 11)</name>
+            <description>Trips using this pattern (11 in total): 12066207, 12066208, 12066209, 12066210, 12066211, 12066212, 12066213, 12067117, 12067118, 12068297, 12069098</description>
+            <styleUrl>#route_041-1062</styleUrl>
+            <visibility>0</visibility>
+            <LineString>
+              <tessellate>1</tessellate>
+              <coordinates>-71.031998,42.345207 -71.035736,42.347637 -71.041344,42.349937 -71.046814,42.353432 -71.048576,42.353825 -71.053276,42.354603 -71.054123,42.355339 -71.056313,42.357624 -71.056732,42.358803 -71.057129,42.360401 -71.058290,42.363021 -71.061290,42.365577</coordinates>
+            </LineString>
+          </Placemark>
+        </Folder>
+      </Folder><Folder>
+        <name>&lt;b>4&lt;/b></name>
+        <Folder>
+          <name>Patterns</name>
+          <visibility>0</visibility>
+          <Placemark>
+            <name>Pattern 1 (trips: 22)</name>
+            <description>Trips using this pattern (22 in total): 12435978, 12435979, 12435980, 12435981, 12435982, 12435983, 12435984, 12435985, 12436084, 12436130, 12436662, 12450285, 12450286, 12450287, 12450288, 12450289, 12450290, 12450291, 12450292, 12450386, 12450387, 12450391</description>
+            <styleUrl>#route_041-1065</styleUrl>
+            <visibility>0</visibility>
+            <LineString>
+              <tessellate>1</tessellate>
+              <coordinates>-71.061290,42.365577 -71.051460,42.366470 -71.051147,42.363976 -71.051094,42.362347 -71.052025,42.359722 -71.053276,42.354603 -71.055242,42.352271 -71.050865,42.350452 -71.044151,42.347260 -71.034454,42.344620 -71.031998,42.345207</coordinates>
+            </LineString>
+          </Placemark><Placemark>
+            <name>Pattern 2 (trips: 22)</name>
+            <description>Trips using this pattern (22 in total): 12433086, 12433087, 12433088, 12433089, 12433090, 12433091, 12433092, 12433996, 12433997, 12435176, 12435977, 12447485, 12447486, 12447487, 12447488, 12447489, 12447490, 12447491, 12448349, 12448350, 12449495, 12450284</description>
+            <styleUrl>#route_041-1065</styleUrl>
+            <visibility>0</visibility>
+            <LineString>
+              <tessellate>1</tessellate>
+              <coordinates>-71.031998,42.345207 -71.035736,42.347637 -71.041344,42.349937 -71.046814,42.353432 -71.048576,42.353825 -71.053276,42.354603 -71.054123,42.355339 -71.056313,42.357624 -71.056732,42.358803 -71.057129,42.360401 -71.058290,42.363021 -71.061290,42.365577</coordinates>
+            </LineString>
+          </Placemark>
+        </Folder>
+      </Folder><Folder>
+        <name>&lt;b>4&lt;/b></name>
+        <Folder>
+          <name>Patterns</name>
+          <visibility>0</visibility>
+          <Placemark>
+            <name>Pattern 1 (trips: 10)</name>
+            <description>Trips using this pattern (10 in total): 12067498, 12067499, 12067500, 12067501, 12067502, 12067503, 12067504, 12067505, 12067940, 12068298</description>
+            <styleUrl>#route_04_-1062</styleUrl>
+            <visibility>0</visibility>
+            <LineString>
+              <tessellate>1</tessellate>
+              <coordinates>-71.061290,42.365577 -71.058290,42.363021 -71.057320,42.358604 -71.055611,42.355518 -71.053368,42.353359 -71.048943,42.353210 -71.047089,42.353447 -71.040886,42.349598 -71.035240,42.346657 -71.031982,42.345093</coordinates>
+            </LineString>
+          </Placemark><Placemark>
+            <name>Pattern 2 (trips: 10)</name>
+            <description>Trips using this pattern (10 in total): 12067497, 12067506, 12067507, 12067508, 12067509, 12067939, 12068299, 12069994, 12070064, 12070322</description>
+            <styleUrl>#route_04_-1062</styleUrl>
+            <visibility>0</visibility>
+            <LineString>
+              <tessellate>1</tessellate>
+              <coordinates>-71.031982,42.345093 -71.036804,42.344681 -71.039017,42.344395 -71.042252,42.346359 -71.044144,42.347370 -71.050865,42.350559 -71.052933,42.351604 -71.053589,42.353630 -71.051178,42.355103 -71.050667,42.356285 -71.051445,42.358704 -71.051704,42.359592 -71.051041,42.362160 -71.051025,42.364094 -71.051262,42.366333 -71.052338,42.367207 -71.057327,42.367851 -71.061290,42.365577</coordinates>
+            </LineString>
+          </Placemark>
+        </Folder>
+      </Folder><Folder>
+        <name>&lt;b>4&lt;/b></name>
+        <Folder>
+          <name>Patterns</name>
+          <visibility>0</visibility>
+          <Placemark>
+            <name>Pattern 1 (trips: 20)</name>
+            <description>Trips using this pattern (20 in total): 12434377, 12434378, 12434379, 12434380, 12434381, 12434382, 12434383, 12434384, 12434819, 12435177, 12448706, 12448707, 12448708, 12448709, 12448710, 12448711, 12448712, 12448713, 12449144, 12449496</description>
+            <styleUrl>#route_04_-1065</styleUrl>
+            <visibility>0</visibility>
+            <LineString>
+              <tessellate>1</tessellate>
+              <coordinates>-71.061290,42.365577 -71.058290,42.363021 -71.057320,42.358604 -71.055611,42.355518 -71.053368,42.353359 -71.048943,42.353210 -71.047089,42.353447 -71.040886,42.349598 -71.035240,42.346657 -71.031982,42.345093</coordinates>
+            </LineString>
+          </Placemark><Placemark>
+            <name>Pattern 2 (trips: 20)</name>
+            <description>Trips using this pattern (20 in total): 12434376, 12434385, 12434386, 12434387, 12434388, 12434818, 12435178, 12436271, 12436341, 12436599, 12448705, 12448714, 12448715, 12448716, 12448717, 12449143, 12449497, 12450388, 12450389, 12450390</description>
+            <styleUrl>#route_04_-1065</styleUrl>
+            <visibility>0</visibility>
+            <LineString>
+              <tessellate>1</tessellate>
+              <coordinates>-71.031982,42.345093 -71.036804,42.344681 -71.039017,42.344395 -71.042252,42.346359 -71.044144,42.347370 -71.050865,42.350559 -71.052933,42.351604 -71.053589,42.353630 -71.051178,42.355103 -71.050667,42.356285 -71.051445,42.358704 -71.051704,42.359592 -71.051041,42.362160 -71.051025,42.364094 -71.052338,42.367207 -71.057327,42.367851 -71.061290,42.365577</coordinates>
+            </LineString>
+          </Placemark>
+        </Folder>
+      </Folder>  </Document>
+</kml>

@@ -2,149 +2,211 @@
   <head>
     <title>MBTA real-time bus feed Google Maps mashup</title>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
-    <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;sensor=false&amp;key=ABQIAAAAH-2YMNuplewSyLBAuM51xhQ7_nmPXc3GnI6m5iy7oUv-chH4TxT-OQBnhlz8oH59nv_dZ_Kjz5SOnw" type="text/javascript"></script>
+    <script src="http://maps.google.com/maps/api/js?sensor=false" type="text/javascript"></script>
   </head>
   
   <body>
     <h1>Where's the bus?</h1>
-    <p>
-      The <a href="http://mbta.com/">MBTA</a> and the Massachusetts 
-      Department of Transportation recently released a 
-      <a href="http://www.eot.state.ma.us/developers/realtime/">trial
-      real-time feed</a> of the locations of MBTA buses on some routes.
-      Right now only the 39, 111, 114, 116, and 117 routes are 
-      available from the MBTA.  I'll add more routes as they're added by 
-      the T.
-    </p>
-    <p>
-      This is a little mashup which takes that data and plots it on 
-      <a href="http://maps.google.com">Google Maps</a>.  Choose a bus 
-      route from the pull down menu below and markers will appear with 
-      the latest locations of its buses.  Red markers are inbound buses,
-      blue markers are outbound buses.  Markers will also update with
-      the latest information every 15 seconds.
-    </p>
-    <p>
-      It was built using <a href="http://appengine.google.com">Google
-      App Engine</a> and is about 50 lines of JavaScript and 50 lines of 
-      Python.  Not bad.
-    </p>
-    <p>
-      If you have any questions, comments, or pretty stylesheets, please 
-      feel free to <a href="mailto:joe@joeshaw.org">email</a>
-      or <a href="http://twitter.com/?status=@joeshaw%20">tweet</a> them
-      to me.
-    </p>
-    <p>
-      <a href="http://joeshaw.org">Joe Shaw</a>, 14 November 2009
-    </p>
-    <p>
-      <i>Update, 4 June 2010</i>: The MBTA has just released additional
-      bus route feeds.  The new routes are 1, 4, 15, 22, 23, 28, 32,
-      57, 66, 71, 73, and 77, and they expect <i>all</i> bus routes to
-      be available by the end of the summer.  Any and all available bus
-      routes will be instantly available on this site.
-    </p>
-
+    
     <select id="option_list">
       <option value="">Select Route</option>
     </select>
     
-    <div id="map_canvas" style="width: 600px; height: 600px"></div>
+    <div id="map_canvas"></div>
+    
+    <p>
+      The <a href="http://mbta.com/">MBTA</a> and the Massachusetts 
+      Department of Transportation have released a 
+      <a href="http://www.eot.state.ma.us/developers/realtime/">
+      real-time feed</a> of the locations of MBTA buses on several
+      routes. Many of the more heavily traveled routes are available,
+      and the MBTA expects <i>all</i> bus routes to be available by the
+      end of the summer.  New routes will be automatically added here
+      as they become available.
+    </p>
+    <p>
+      This is a little mashup which takes that real-time data and plots
+      it on  <a href="http://maps.google.com">Google Maps</a>.  Choose
+      a bus route from the pull down menu below and markers will appear
+      with the latest locations of its buses.  Red markers are inbound
+      buses, blue markers are outbound buses.  Markers will also update
+      with the latest information every 10 seconds.
+    </p>
+    <p>
+      It is built in about 150 lines of JavaScript.  It is hosted on
+      top of <a href="http://appengine.google.com">Google App
+      Engine</a>, although this version of the site no longer uses GAE
+      for anything other than serving the HTML files.  This version of
+      the site is using <a href="http://proximobus.appspot.com/">
+      ProximoBus</a> alternative API to get the data from the MBTA.
+      Source code is available on
+      <a href="http://github.com/joeshaw/mbta-bus">GitHub</a>.
+    </p>
+    <p>
+      If you have any questions, comments, or pretty stylesheets,
+      please  feel free to <a href="mailto:joe@joeshaw.org">email</a>
+      or <a href="http://twitter.com/?status=@joeshaw%20">tweet</a>
+      them to me.
+    </p>
+    <p>
+      The original version of this site went up on 14 November 2009,
+      one day after the MBTA first made this data available.  It was
+      updated with additional bus routes on 4 June 2010, and was
+      largely rewritten to take advantage of the Google Maps v3 API and
+      ProximoBus on 6 June 2010.
+    <p>
+      <a href="http://joeshaw.org">Joe Shaw</a>
+    </p>
 
     <script type="text/javascript">
       $(document).ready(function() {
-        var map = new GMap2(document.getElementById("map_canvas"));
-        map.setCenter(new GLatLng(42.357778, -71.061667), 12);
-        map.setUIToDefault();
+        var useragent = navigator.userAgent;
+        var map_canvas = document.getElementById("map_canvas");
         
-        var geocoder = new GClientGeocoder();
-
-        var markers = [];
-        var displayed_route = null;
-
-        function update_markers() {
-          route = $("select option:selected").attr("value");
-          
-          if (route == "") {
-            map.clearOverlays();
-            markers = [];
-            displayed_route = null;
-            return;
-          }
-          
-          $.get("/vehiclelocations/?route=" + route,
-            function (xmldoc) {
-              if (route != displayed_route) {
-                map.clearOverlays();
-                
-                kml = new GGeoXml("http://mbta-bus.appspot.com/kml/" + route + ".kml");
-                kml.show();
-                map.addOverlay(kml);
-              } else {
-                for (i = 0, l = markers.length; i < l; i++)
-                  map.removeOverlay(markers[i]);
-                markers = [];
-              }
-              displayed_route = route;
-              
-              $(xmldoc).find("vehicle").each(function() {
-                var vehicle = $(this);
-                var predictable = vehicle.attr('predictable');
-
-                // If a bus isn't marked as predictable, it's probably "off the reservation"
-                if (predictable != "true")
-                  return;
-
-                var latlong = new GLatLng(vehicle.attr('lat'), vehicle.attr('lon'));
-                var direction = vehicle.attr('dirTag');
-                var icon = new GIcon();
-                if (direction == "in")
-                  icon.image = "images/red-dot.png";
-                else
-                  icon.image = "images/blue-dot.png";
-                icon.iconSize = new GSize(32, 32);
-                icon.iconAnchor = new GPoint(16, 32);
-                icon.infoWindowAnchor = new GPoint(16, 0);
-                var placemark = null;
-                geocoder.getLocations(latlong, function(response) {
-                  if (!response || response.Status.code != 200)
-                    return;
-                    
-                  placemark = response.Placemark[0];
-                });
-                var marker = new GMarker(latlong, {icon: icon});
-                GEvent.addListener(marker, "click", function() {
-                  var content = '<h1>Route ' + route + '</h1>'
-                  content += '<p>Bus ' + vehicle.attr('id') + '</p>'
-                  if (direction == "in")
-                    content += "<p>Inbound</p>";
-                  else if (direction == "out")
-                    content += "<p>Outbound</p>";
-                  if (placemark != null) {
-                    content += "<p>" + placemark.address + "</p>"
-                  }
-                  marker.openInfoWindowHtml(content);
-                });
-                markers.push(marker);
-                map.addOverlay(marker);
-              });
-            });
+        if (useragent.indexOf('iPhone') != -1 || useragent.indexOf('Android') != -1 ) {
+          map_canvas.style.width = '100%';
+          map_canvas.style.height = '100%';
+        } else {
+          map_canvas.style.width = '80%';
+          map_canvas.style.height = '600px';
         }
         
-        // Update the markers any time the option box is changed, or
-        // every 15 seconds.
-        $("select").change(update_markers);
-        setInterval(update_markers, 15000);
+        var mapOptions = {
+          zoom: 12,
+          center: new google.maps.LatLng(42.357778, -71.061667),
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        
+        var map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
+        
+        // Some global variables
+        var route = "";
+        var buses = {};
+        var kml_layer = null;
+        var open_info_window = null;
 
-        $.get("/getroutes/", 
-          function(xmldoc) {            
-            $(xmldoc).find("route").each(function () {
-              var route = $(this);
-              $("#option_list").append('<option value="' + route.attr('tag') + '">' + route.attr("title") + "</option>");
-            });
-          });          
-        });
+        $.getJSON("http://proximobus.appspot.com/agencies/mbta/routes.js?callback=?",
+                  function(data) {
+                    for (var i = 0; i < data['items'].length; i++) {
+                      var route = data['items'][i];
+                      $("#option_list").append('<option value="' + route.id + '">' + route.display_name + '</option>');
+                    }
+                  });
+
+        // Update the markers any time the option box is changed, or
+        // every 10 seconds.
+        $("select").change(updateMarkers);
+        setInterval(updateMarkers, 10000);
+
+        function updateMarkers() {
+          var old_route = route;
+          route = $("select option:selected").attr("value");
+
+          if (route != old_route) {
+            for (var id in buses) {
+              buses[id].marker.setMap(null);
+            }
+            buses = {};
+
+            if (kml_layer)
+              kml_layer.setMap(null);
+
+            if (route == "")
+              return;
+
+            // This URL is currently unparseable by google maps.  bleh.
+            //var kml_url = "http://proximobus.appspot.com/agencies/mbta/routes/" + route + "/stops.kml";
+            var kml_url = "http://mbta-bus.appspot.com/kml/" + route + ".kml";
+            kml_layer = new google.maps.KmlLayer(kml_url, { map: map, suppressInfoWindows: true });
+          }
+
+          var vehicle_url = "http://proximobus.appspot.com/agencies/mbta/routes/" + route + "/vehicles.js?callback=?";
+          $.getJSON(vehicle_url, function(data) {
+            var new_buses = {};
+            
+            for (var i = 0; i < data['items'].length; i++) {
+              var vehicle = data['items'][i];
+              var latlong = new google.maps.LatLng(vehicle.latitude, vehicle.longitude);
+              var run_id = vehicle.run_id;
+              
+              if (!run_id) {
+                // Bus is "off the reservation"
+                continue;
+              }
+              
+              // MBTA run IDs (aka "directions") are currently horked.  Seems like
+              // ending in 1 is inbound, 0 is outbound, at least for the #1
+              if (run_id[run_id.length - 1] == '1')
+                run_id = 'in';
+              else if (run_id[run_id.length - 1] == '0')
+                run_id = 'out';
+
+              // Have we seen this bus before?  If not, create a new marker for it
+              var bus = buses[vehicle.id];
+              if (!bus) {
+                var marker = new google.maps.Marker({
+                  position: latlong,
+                  map: map,
+                  icon: run_id == 'out' ? 'images/blue-dot.png' : 'images/red-dot.png'
+                });
+                
+                marker.vehicle = vehicle;
+                marker.run_id = run_id;
+                
+                google.maps.event.addListener(marker, "click", function() {
+                  var content = '<h1>Route ' + route + '</h1>'
+                  content += '<p>Bus ' + this.vehicle.id + '</p>'
+                  if (this.run_id == 'out')
+                    content += '<p>Outbound</p>';
+                  if (this.run_id == 'in')
+                    content += '<p>Inbound</p>';
+
+                  var info_window = new google.maps.InfoWindow({
+                    content: content,                              
+                  });
+                  
+                  google.maps.event.addListener(info_window, "closeclick", function() {
+                    open_info_window = null;
+                  })
+                  
+                  if (open_info_window)
+                    open_info_window.close();
+                  open_info_window = info_window;
+                  
+                  info_window.open(map, this);
+                });
+                
+                bus = { marker: marker,
+                        latlong: latlong,
+                        run_id: run_id };
+              }
+              
+              new_buses[vehicle.id] = bus;
+              delete buses[vehicle.id];
+              
+              // Position differs from previous position, move the marker
+              if (!latlong.equals(bus.latlong)) {
+                bus.latlong = latlong;
+                bus.marker.setPosition(latlong);
+              }
+              
+              // The bus seems to have gone from Inbound to Outbound or
+              // vice versa.  Change the marker color.
+              if (bus.run_id != run_id) {
+                bus.run_id = run_id;
+                bus.marker.setIcon(run_id == 'out' ? 'images/blue-dot.png' : 'images/red-dot.png');
+              }
+            }
+            
+            // Buses no longer on the map    
+            for (var id in buses) {
+              buses[id].marker.setMap(null);
+            }
+
+            buses = new_buses;                      
+          });
+        }
+      });
     </script>
 
     <script type="text/javascript">

@@ -82,13 +82,14 @@
         // Some global variables
         var route = "";
         var buses = {};
+        var runs = {};
         var kml_layer = null;
         var open_info_window = null;
 
         $.getJSON("http://proximobus.appspot.com/agencies/mbta/routes.js?callback=?",
                   function(data) {
-                    for (var i = 0; i < data['items'].length; i++) {
-                      var route = data['items'][i];
+                    for (var i = 0; i < data.items.length; i++) {
+                      var route = data.items[i];
                       $("#option_list").append('<option value="' + route.id + '">' + route.display_name + '</option>');
                     }
                   });
@@ -119,13 +120,35 @@
             var kml_url = "http://mbta-bus.appspot.com/kml/" + route + ".kml";
             kml_layer = new google.maps.KmlLayer(kml_url, { map: map, suppressInfoWindows: true });
           }
-
+          
+          if (!runs[route]) {
+            var run_url = "http://proximobus.appspot.com/agencies/mbta/routes/" + route + "/runs.js?callback=?";
+            $.getJSON(run_url, function(data) {
+              runs[route] = {};
+              for (var i = 0; i < data.items.length; i++) {
+                if (data.items[i].display_name.match(/^inbound/i)) {
+                  data.items[i].icon = "images/red-dot.png";
+                } else if (data.items[i].display_name.match(/^outbound/i)) {
+                  data.items[i].icon = "images/blue-dot.png";
+                }
+                
+                runs[route][data.items[i].id] = data.items[i];
+              }
+              
+              placeVehicles();
+            });
+          } else {
+            placeVehicles();
+          }
+        }
+        
+        function placeVehicles() {
           var vehicle_url = "http://proximobus.appspot.com/agencies/mbta/routes/" + route + "/vehicles.js?callback=?";
           $.getJSON(vehicle_url, function(data) {
             var new_buses = {};
             
-            for (var i = 0; i < data['items'].length; i++) {
-              var vehicle = data['items'][i];
+            for (var i = 0; i < data.items.length; i++) {
+              var vehicle = data.items[i];
               var latlong = new google.maps.LatLng(vehicle.latitude, vehicle.longitude);
               var run_id = vehicle.run_id;
               
@@ -134,35 +157,22 @@
                 continue;
               }
               
-              // MBTA run IDs (aka "directions") are currently horked.  Seems like
-              // ending in 1 is inbound, 0 is outbound, at least for the #1
-              if (run_id[run_id.length - 1] == '1')
-                run_id = 'in';
-              else if (run_id[run_id.length - 1] == '0')
-                run_id = 'out';
-
               // Have we seen this bus before?  If not, create a new marker for it
               var bus = buses[vehicle.id];
               if (!bus) {
                 var marker = new google.maps.Marker({
                   position: latlong,
                   map: map,
-                  icon: run_id == 'out' ? 'images/blue-dot.png' : 'images/red-dot.png'
+                  icon: runs[route][run_id].icon
                 });
                 
-                marker.vehicle = vehicle;
-                marker.run_id = run_id;
+                marker.infoContent = '<h1>Route ' + route + '</h1>';
+                marker.infoContent += '<p>Bus ' + vehicle.id + '</p>';
+                marker.infoContent += '<p>' + runs[route][run_id].display_name + '</p>';
                 
                 google.maps.event.addListener(marker, "click", function() {
-                  var content = '<h1>Route ' + route + '</h1>'
-                  content += '<p>Bus ' + this.vehicle.id + '</p>'
-                  if (this.run_id == 'out')
-                    content += '<p>Outbound</p>';
-                  if (this.run_id == 'in')
-                    content += '<p>Inbound</p>';
-
                   var info_window = new google.maps.InfoWindow({
-                    content: content,                              
+                    content: this.infoContent,                              
                   });
                   
                   google.maps.event.addListener(info_window, "closeclick", function() {
@@ -194,7 +204,7 @@
               // vice versa.  Change the marker color.
               if (bus.run_id != run_id) {
                 bus.run_id = run_id;
-                bus.marker.setIcon(run_id == 'out' ? 'images/blue-dot.png' : 'images/red-dot.png');
+                bus.marker.setIcon(runs[route][run_id].icon);
               }
             }
             

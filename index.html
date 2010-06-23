@@ -12,6 +12,9 @@
       <option value="">Select Route</option>
     </select>
     
+    <span><img src="images/red-dot.png"> = Inbound</span>
+    <span><img src="images/blue-dot.png"> = Outbound</span>
+    
     <div id="map_canvas"></div>
     
     <p>
@@ -28,12 +31,12 @@
       This is a little mashup which takes that real-time data and plots
       it on  <a href="http://maps.google.com">Google Maps</a>.  Choose
       a bus route from the pull down menu below and markers will appear
-      with the latest locations of its buses.  Red markers are inbound
-      buses, blue markers are outbound buses.  Markers will also update
-      with the latest information every 10 seconds.
+      with the latest locations of its buses.  Red markers and route lines
+      are inbound, blue markers and lines are outbound.  Markers will also
+      update with the latest information every 10 seconds.
     </p>
     <p>
-      It is built in about 150 lines of JavaScript.  It is hosted on
+      It is built in about 250 lines of JavaScript.  It is hosted on
       top of <a href="http://appengine.google.com">Google App
       Engine</a>, although this version of the site no longer uses GAE
       for anything other than serving the HTML files.  This version of
@@ -53,7 +56,8 @@
       one day after the MBTA first made this data available.  It was
       updated with additional bus routes on 4 June 2010, and was
       largely rewritten to take advantage of the Google Maps v3 API and
-      ProximoBus on 6 June 2010.
+      ProximoBus on 6 June 2010.  Markers for stops and predictions for
+      the next bus arrival were added on 22 June 2010.
     <p>
       <a href="http://joeshaw.org">Joe Shaw</a>
     </p>
@@ -65,7 +69,7 @@
         
         if (useragent.indexOf('iPhone') != -1 || useragent.indexOf('Android') != -1 ) {
           map_canvas.style.width = '100%';
-          map_canvas.style.height = '100%';
+          map_canvas.style.height = '80%';
         } else {
           map_canvas.style.width = '80%';
           map_canvas.style.height = '600px';
@@ -79,11 +83,19 @@
         
         var map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
         
+        var direction_data = {
+          inbound:  { icon: "images/red-dot.png",
+                      line_color: "#FF0000" },
+          outbound: { icon: "images/blue-dot.png",
+                      line_color: "#0000FF" }
+        };        
+        
         // Some global variables
         var route = "";
         var buses = {};
-        var runs = {};
-        var kml_layer = null;
+        var routes = {};
+        var stops = [];
+        var lines = [];
         var open_info_window = null;
 
         $.getJSON("http://proximobus.appspot.com/agencies/mbta/routes.js?callback=?",
@@ -99,47 +111,143 @@
         $("select").change(updateMarkers);
         setInterval(updateMarkers, 10000);
 
+        function resetMarkers() {
+          for (var id in buses) {
+            buses[id].marker.setMap(null);
+          }
+          buses = {};
+          
+          for (var i = 0; i < stops.length; i++) {
+            stops[i].setMap(null);
+          }
+          stops = [];
+          
+          for (var i = 0; i < lines.length; i++) {
+            lines[i].setMap(null);
+          }
+          lines = [];
+        }
+
         function updateMarkers() {
           var old_route = route;
           route = $("select option:selected").attr("value");
 
           if (route != old_route) {
-            for (var id in buses) {
-              buses[id].marker.setMap(null);
-            }
-            buses = {};
-
-            if (kml_layer)
-              kml_layer.setMap(null);
-
-            if (route == "")
-              return;
-
-            // This URL is currently unparseable by google maps.  bleh.
-            //var kml_url = "http://proximobus.appspot.com/agencies/mbta/routes/" + route + "/stops.kml";
-            var kml_url = "http://mbta-bus.appspot.com/kml/" + route + ".kml";
-            kml_layer = new google.maps.KmlLayer(kml_url, { map: map, suppressInfoWindows: true });
+            resetMarkers();
           }
+
+          if (route == "")
+            return;
           
-          if (!runs[route]) {
-            var run_url = "http://proximobus.appspot.com/agencies/mbta/routes/" + route + "/runs.js?callback=?";
-            $.getJSON(run_url, function(data) {
-              runs[route] = {};
-              for (var i = 0; i < data.items.length; i++) {
-                if (data.items[i].display_name.match(/^inbound/i)) {
-                  data.items[i].icon = "images/red-dot.png";
-                } else if (data.items[i].display_name.match(/^outbound/i)) {
-                  data.items[i].icon = "images/blue-dot.png";
-                }
-                
-                runs[route][data.items[i].id] = data.items[i];
-              }
-              
-              placeVehicles();
-            });
+          if (!routes[route]) {
+            fetchRouteData();
           } else {
+            if (route != old_route) {
+              for (var run_id in routes[route]) {
+                placeStopsAndLines(run_id);
+              }
+            }
+
             placeVehicles();
           }
+        }
+        
+        function fetchRouteData() {
+          routes[route] = {};
+          
+          var run_url = "http://proximobus.appspot.com/agencies/mbta/routes/" + route + "/runs.js?callback=?";
+          $.getJSON(run_url, function(data) {
+            for (var i = 0; i < data.items.length; i++) {
+              var run = data.items[i];
+              
+              if (run.display_name.match(/^inbound/i)) {
+                run.direction = "inbound";
+              } else if (data.items[i].display_name.match(/^outbound/i)) {
+                run.direction = "outbound";
+              }
+              
+              routes[route][run.id] = run;
+              placeStopsAndLines(run.id);
+            }
+              
+            placeVehicles();
+          });
+        }
+          
+        function placeStopsAndLines(run_id) {
+          var stops_url = "http://proximobus.appspot.com/agencies/mbta/routes/" + route + "/runs/" + run_id + "/stops.js?callback=?";
+          $.getJSON(stops_url, function(data) {
+            var stop_latlongs = [];
+            for (var i = 0; i < data.items.length; i++) {
+              var stop = data.items[i];
+              var latlong = new google.maps.LatLng(stop.latitude, stop.longitude);
+              var marker = new google.maps.Marker({
+                position: latlong,
+                map: map,
+                icon: "http://www.nextmuni.com/googleMap/images/stopMarkerRed.gif"
+              });
+              
+              marker.stop_id = stop.id;              
+              marker.infoContent = '<h1>' + stop.display_name + '</h1>';
+              marker.infoContent += '<p>' + routes[route][run_id].display_name + '</p>';
+              
+              google.maps.event.addListener(marker, "click", function() {
+                var info_window = new google.maps.InfoWindow({
+                  content: this.infoContent,
+                });
+
+                var prediction_url = "http://proximobus.appspot.com/agencies/mbta/stops/" + this.stop_id + "/predictions.js?callback=?";
+                $.getJSON(prediction_url, function(data) {
+                  if (data.items.length == 0)
+                    return;
+                    
+                  var content = info_window.getContent();
+                  content += "<p>Expected arrivals:";
+                  content += "<ul>";
+                  
+                  for (var i = 0; i < Math.min(5, data.items.length); i++) {
+                    var prediction = data.items[i];
+                    
+                    content += "<li>";
+                    if (prediction.seconds < 60)
+                      content += prediction.seconds + " seconds";
+                    else
+                      content += prediction.minutes + " minutes";
+                      
+                    content += "</li>";
+                  }
+                  
+                  content += "</ul></p>";
+                  
+                  info_window.setContent(content);
+                });
+
+                google.maps.event.addListener(info_window, "closeclick", function() {
+                  open_info_window = null;
+                });
+
+                if (open_info_window)
+                  open_info_window.close();
+                open_info_window = info_window;
+
+                info_window.open(map, this);
+              });
+
+              stops.push(marker);
+              stop_latlongs.push(latlong);
+            }
+            
+            var line = new google.maps.Polyline({
+              clickable: false,
+              geodesic: false,
+              map: map,
+              path: stop_latlongs,
+              strokeColor: direction_data[routes[route][run_id].direction].line_color,
+              strokeOpacity: 0.75,
+              strokeWeight: 5
+            });
+            lines.push(line);
+          });
         }
         
         function placeVehicles() {
@@ -163,12 +271,12 @@
                 var marker = new google.maps.Marker({
                   position: latlong,
                   map: map,
-                  icon: runs[route][run_id].icon
+                  icon: direction_data[routes[route][run_id].direction].icon
                 });
                 
                 marker.infoContent = '<h1>Route ' + route + '</h1>';
                 marker.infoContent += '<p>Bus ' + vehicle.id + '</p>';
-                marker.infoContent += '<p>' + runs[route][run_id].display_name + '</p>';
+                marker.infoContent += '<p>' + routes[route][run_id].display_name + '</p>';
                 
                 google.maps.event.addListener(marker, "click", function() {
                   var info_window = new google.maps.InfoWindow({
@@ -204,7 +312,7 @@
               // vice versa.  Change the marker color.
               if (bus.run_id != run_id) {
                 bus.run_id = run_id;
-                bus.marker.setIcon(runs[route][run_id].icon);
+                bus.marker.setIcon(direction_data[routes[route][run_id].direction].icon);
               }
             }
             

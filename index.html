@@ -12,10 +12,12 @@
       <option value="">Select Route</option>
     </select>
     
-    <span><img src="images/red-dot.png"> = Inbound</span>
-    <span><img src="images/blue-dot.png"> = Outbound</span>
-    
     <div id="map_canvas"></div>
+
+    <div id="marker_legend" style="display: none;">
+      <img src="images/red-dot.png"><span id="red_marker_name"></span>
+      <img src="images/blue-dot.png"><span id="blue_marker_name"></span>
+    </div>
     
     <p>
       The <a href="http://mbta.com/">MBTA</a> and the Massachusetts 
@@ -83,12 +85,15 @@
         
         var map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
         
-        var direction_data = {
-          inbound:  { icon: "images/red-dot.png",
-                      line_color: "#FF0000" },
-          outbound: { icon: "images/blue-dot.png",
-                      line_color: "#0000FF" }
-        };        
+        var direction_data = [
+          { icon: "images/red-dot.png",
+            line_color: "#FF0000",
+            label_id: "#red_marker_name" },
+
+          { icon: "images/blue-dot.png",
+            line_color: "#0000FF",
+            label_id: "#blue_marker_name" }
+        ];
         
         // Some global variables
         var route = "";
@@ -112,6 +117,8 @@
         setInterval(updateMarkers, 10000);
 
         function resetMarkers() {
+          $("#marker_legend").hide();
+          
           for (var id in buses) {
             buses[id].marker.setMap(null);
           }
@@ -157,14 +164,25 @@
           
           var run_url = "http://proximobus.appspot.com/agencies/mbta/routes/" + route + "/runs.js?callback=?";
           $.getJSON(run_url, function(data) {
+            var mapped_direction_data = {};
+            var direction_index = 0;
+            
             for (var i = 0; i < data.items.length; i++) {
               var run = data.items[i];
+
+              if (!run.display_in_ui)
+                continue;
               
-              if (run.direction_name.match(/^inbound/i)) {
-                run.direction = "inbound";
-              } else if (run.direction_name.match(/^outbound/i)) {
-                run.direction = "outbound";
+              if (mapped_direction_data[run.display_name]) {
+                run.direction_data = mapped_direction_data[run.display_name];
+              } else {
+                run.direction_data = direction_data[direction_index];
+                mapped_direction_data[run.display_name] = run.direction_data;
+                direction_index++;
               }
+
+              $("#marker_legend").show();
+              $(run.direction_data.label_id).text(run.display_name);
               
               routes[route][run.id] = run;
               placeStopsAndLines(run.id);
@@ -242,7 +260,7 @@
               geodesic: false,
               map: map,
               path: stop_latlongs,
-              strokeColor: direction_data[routes[route][run_id].direction].line_color,
+              strokeColor: routes[route][run_id].direction_data.line_color,
               strokeOpacity: 0.75,
               strokeWeight: 5
             });
@@ -271,7 +289,7 @@
                 var marker = new google.maps.Marker({
                   position: latlong,
                   map: map,
-                  icon: direction_data[routes[route][run_id].direction].icon
+                  icon: routes[route][run_id].direction_data.icon
                 });
                 
                 marker.infoContent = '<h1>Route ' + route + '</h1>';
@@ -312,7 +330,7 @@
               // vice versa.  Change the marker color.
               if (bus.run_id != run_id) {
                 bus.run_id = run_id;
-                bus.marker.setIcon(direction_data[routes[route][run_id].direction].icon);
+                bus.marker.setIcon(routes[route][run_id].direction_data.icon);
               }
             }
             

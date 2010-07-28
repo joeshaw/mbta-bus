@@ -196,9 +196,13 @@
           var stops_url = "http://proximobus.appspot.com/agencies/mbta/routes/" + route + "/runs/" + run_id + "/stops.js?callback=?";
           $.getJSON(stops_url, function(data) {
             var stop_latlongs = [];
+            var bounds = new google.maps.LatLngBounds();
             for (var i = 0; i < data.items.length; i++) {
               var stop = data.items[i];
               var latlong = new google.maps.LatLng(stop.latitude, stop.longitude);
+
+              bounds.extend(latlong);
+
               var marker = new google.maps.Marker({
                 position: latlong,
                 map: map,
@@ -265,6 +269,8 @@
               strokeWeight: 5
             });
             lines.push(line);
+            
+            map.fitBounds(bounds);
           });
         }
         

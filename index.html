@@ -14,9 +14,7 @@
     
     <div id="map_canvas"></div>
 
-    <div id="marker_legend" style="display: none;">
-      <img src="images/red-dot.png"><span id="red_marker_name"></span>
-      <img src="images/blue-dot.png"><span id="blue_marker_name"></span>
+    <div id="marker_legend">
     </div>
     
     <p>
@@ -33,9 +31,10 @@
       This is a little mashup which takes that real-time data and plots
       it on  <a href="http://maps.google.com">Google Maps</a>.  Choose
       a bus route from the pull down menu below and markers will appear
-      with the latest locations of its buses.  Red markers and route lines
-      are inbound, blue markers and lines are outbound.  Markers will also
-      update with the latest information every 10 seconds.
+      with the latest locations of its buses.  Markers will update with
+      the latest information from the T every 10 seconds.  Click on a
+      bus stop marker to see predictions for when the next bus will
+      arrive.
     </p>
     <p>
       It is built in about 250 lines of JavaScript.  It is hosted on
@@ -90,12 +89,22 @@
         
         var direction_data = [
           { icon: "images/red-dot.png",
-            line_color: "#FF0000",
-            label_id: "#red_marker_name" },
+            line_color: "#FF0000" },
 
           { icon: "images/blue-dot.png",
-            line_color: "#0000FF",
-            label_id: "#blue_marker_name" }
+            line_color: "#0000FF" },
+            
+          { icon: "images/green-dot.png",
+            line_color: "#00FF00" },
+            
+          { icon: "images/yellow-dot.png",
+            line_color: "#FFFF00" },
+            
+          { icon: "images/orange-dot.png",
+            line_color: "#FF7700" },
+            
+          { icon: "images/purple-dot.png",
+            line_color: "#FF00FF" }
         ];
         
         // Some global variables
@@ -120,7 +129,7 @@
         setInterval(updateMarkers, 10000);
 
         function resetMarkers() {
-          $("#marker_legend").hide();
+          $("#marker_legend").empty();
           
           for (var id in buses) {
             buses[id].marker.setMap(null);
@@ -184,8 +193,7 @@
                 direction_index++;
               }
 
-              $("#marker_legend").show();
-              $(run.direction_data.label_id).text(run.display_name);
+              $("#marker_legend").append('<img src="' + run.direction_data.icon + '">' + run.display_name);
               
               routes[route][run.id] = run;
               placeStopsAndLines(run.id);

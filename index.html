@@ -1,8 +1,8 @@
 <html>
   <head>
     <title>MBTA real-time bus feed Google Maps mashup</title>
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
-    <script src="http://maps.google.com/maps/api/js?sensor=false" type="text/javascript"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+    <script src="https://maps.google.com/maps/api/js?sensor=false" type="text/javascript"></script>
   </head>
   
   <body>
@@ -115,7 +115,7 @@
         var lines = [];
         var open_info_window = null;
 
-        $.getJSON("http://proximobus.appspot.com/agencies/mbta/routes.js?callback=?",
+        $.getJSON("https://proximobus.appspot.com/agencies/mbta/routes.js?callback=?",
                   function(data) {
                     for (var i = 0; i < data.items.length; i++) {
                       var route = data.items[i];
@@ -174,7 +174,7 @@
         function fetchRouteData() {
           routes[route] = {};
           
-          var run_url = "http://proximobus.appspot.com/agencies/mbta/routes/" + route + "/runs.js?callback=?";
+          var run_url = "https://proximobus.appspot.com/agencies/mbta/routes/" + route + "/runs.js?callback=?";
           $.getJSON(run_url, function(data) {
             var mapped_direction_data = {};
             var direction_index = 0;
@@ -204,7 +204,7 @@
         }
           
         function placeStopsAndLines(run_id) {
-          var stops_url = "http://proximobus.appspot.com/agencies/mbta/routes/" + route + "/runs/" + run_id + "/stops.js?callback=?";
+          var stops_url = "https://proximobus.appspot.com/agencies/mbta/routes/" + route + "/runs/" + run_id + "/stops.js?callback=?";
           $.getJSON(stops_url, function(data) {
             var stop_latlongs = [];
             var bounds = new google.maps.LatLngBounds();
@@ -229,7 +229,7 @@
                   content: this.infoContent,
                 });
 
-                var prediction_url = "http://proximobus.appspot.com/agencies/mbta/stops/" + this.stop_id + "/predictions.js?callback=?";
+                var prediction_url = "https://proximobus.appspot.com/agencies/mbta/stops/" + this.stop_id + "/predictions.js?callback=?";
                 $.getJSON(prediction_url, function(data) {
                   if (data.items.length == 0)
                     return;
@@ -286,7 +286,7 @@
         }
         
         function placeVehicles() {
-          var vehicle_url = "http://proximobus.appspot.com/agencies/mbta/routes/" + route + "/vehicles.js?callback=?";
+          var vehicle_url = "https://proximobus.appspot.com/agencies/mbta/routes/" + route + "/vehicles.js?callback=?";
           $.getJSON(vehicle_url, function(data) {
             var new_buses = {};
             

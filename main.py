@@ -9,7 +9,8 @@ from google.appengine.api.urlfetch import fetch
 class MainHandler(RequestHandler):
 
 	def get(self):
-		self.response.out.write(template.render('index.html', {}))
+                #self.response.out.write(template.render('index.html', {}))
+                self.redirect("https://joeshaw.org/mbta-bus", permanent=True)
 
 handlers = [
 	('/', MainHandler),

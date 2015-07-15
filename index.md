@@ -42,9 +42,6 @@ updated periodically since then.  The latest update came on 13 July
 API to the MBTA's official v2 API.  This change brought in subway,
 commuter rail, and ferry locations in addition to buses.
 
-*Note: Drawing of the route lines currently isn't working.  I am
-looking into restoring this functionality with a better map overlay.*
-
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
 <script src="https://maps.google.com/maps/api/js?sensor=false" type="text/javascript"></script><script type="text/javascript">
   $(document).ready(function() {
@@ -94,6 +91,7 @@ looking into restoring this functionality with a better map overlay.*
     var selected_route = "";
     var vehicle_markers = {};
     var stop_markers = [];
+    var route_layer = null;
     var lines = [];
     var open_info_window = null;
 
@@ -151,6 +149,11 @@ looking into restoring this functionality with a better map overlay.*
         lines[i].setMap(null);
       }
       lines = [];
+
+      if (route_layer !== null) {
+        route_layer.setMap(null);
+        route_layer = null;
+      }
     }
 
     function resetVehicleMarkers() {
@@ -201,18 +204,11 @@ looking into restoring this functionality with a better map overlay.*
             stop_latlongs.push(latlong)
           }
 
-          /*
-          var line = new google.maps.Polyline({
-            clickable: false,
-            geodesic: false,
-            map: map,
-            path: stop_latlongs,
-            strokeColor: direction_data[i].line_color,
-            strokeOpacity: 0.75,
-            strokeWeight: 5
+          route_layer = new google.maps.KmlLayer({
+            url: "https://joeshaw.org/mbta-bus/kml/" + route_id + ".kml"
+            suppressInfoWindows: true,
+            map: map
           });
-          lines.push(line);
-          */
         }
 
         map.fitBounds(bounds)

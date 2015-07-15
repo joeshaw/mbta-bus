@@ -203,13 +203,13 @@ commuter rail, and ferry locations in addition to buses.
             bounds.extend(latlong)
             stop_latlongs.push(latlong)
           }
-
-          route_layer = new google.maps.KmlLayer({
-            url: "https://joeshaw.org/mbta-bus/kml/" + route_id + ".kml",
-            suppressInfoWindows: true,
-            map: map
-          });
         }
+
+        route_layer = new google.maps.KmlLayer({
+          url: "https://joeshaw.org/mbta-bus/kml/" + route_id + ".kml",
+          suppressInfoWindows: true,
+          map: map
+        });
 
         map.fitBounds(bounds)
       });
@@ -225,7 +225,7 @@ commuter rail, and ferry locations in addition to buses.
       });
 
       marker.stop_id = stop.stop_id;
-      marker.infoContent = '<h1>' + stop.stop_name + '</h1>';
+      marker.infoContent = '<h3>' + stop.stop_name + '</h3>';
       marker.infoContent += '<p>' + direction_name  + '</p>';
 
       google.maps.event.addListener(marker, "click", function() {
@@ -320,7 +320,7 @@ commuter rail, and ferry locations in addition to buses.
                 icon: direction_data[i].icon
               });
 
-              marker.infoContent = '<h1>Route ' + data.route_name + ' ' + direction.direction_name + '</h1>';
+              marker.infoContent = '<h3>Route ' + data.route_name + ' ' + direction.direction_name + '</h3>';
               marker.infoContent += '<p>' + trip.trip_headsign + '</p>';
 
               google.maps.event.addListener(marker, "click", function() {

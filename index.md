@@ -205,7 +205,7 @@ commuter rail, and ferry locations in addition to buses.
           }
 
           route_layer = new google.maps.KmlLayer({
-            url: "https://joeshaw.org/mbta-bus/kml/" + route_id + ".kml"
+            url: "https://joeshaw.org/mbta-bus/kml/" + route_id + ".kml",
             suppressInfoWindows: true,
             map: map
           });

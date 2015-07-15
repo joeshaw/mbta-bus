@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"sort"
 
 	"github.com/geops/gtfsparser"
 	"github.com/geops/gtfsparser/gtfs"
@@ -25,22 +26,30 @@ func main() {
 		log.Fatal(err)
 	}
 
-	routeMap := map[string]map[string]*gtfs.Shape{}
+	routeMap := map[string][]*gtfs.Shape{}
 
 	for _, trip := range feed.Trips {
 		if trip.Shape == nil {
 			continue
 		}
 
-		if _, ok := routeMap[trip.Route.Id]; !ok {
-			routeMap[trip.Route.Id] = map[string]*gtfs.Shape{}
+		found := false
+		for _, shape := range routeMap[trip.Route.Id] {
+			if shape == trip.Shape {
+				found = true
+				break
+			}
 		}
 
-		routeMap[trip.Route.Id][trip.Shape.Id] = trip.Shape
+		if !found {
+			routeMap[trip.Route.Id] = append(routeMap[trip.Route.Id], trip.Shape)
+		}
 	}
 
-	for routeID, shapeMap := range routeMap {
+	for routeID, shapes := range routeMap {
 		fmt.Printf("Generating for route %s\n", routeID)
+
+		sort.Sort(ByShapeID(shapes))
 
 		f, err := os.Create(routeID + ".kml")
 		if err != nil {
@@ -48,7 +57,7 @@ func main() {
 		}
 
 		kml := gokml.NewKML(routeID)
-		for _, shape := range shapeMap {
+		for _, shape := range shapes {
 			ls := gokml.NewLineString()
 			for _, p := range shape.Points {
 				point := gokml.NewPoint(float64(p.Lat), float64(p.Lon), 0)
@@ -61,4 +70,18 @@ func main() {
 		io.WriteString(f, kml.Render())
 		f.Close()
 	}
+}
+
+type ByShapeID []*gtfs.Shape
+
+func (s ByShapeID) Len() int {
+	return len(s)
+}
+
+func (s ByShapeID) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+func (s ByShapeID) Less(i, j int) bool {
+	return s[i].Id < s[j].Id
 }

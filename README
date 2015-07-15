@@ -1,20 +1,8 @@
-The MBTA and the Massachusetts Department of Transportation recently
-released a trial real-time feed of the locations of MBTA buses on some
-routes. Right now only the 39, 111, 114, 116, and 117 routes are
-available from the MBTA. I'll add more routes as they're added by the
-T.
+A Google Maps mashup with real-time bus, subway, commuter rail and
+ferry information from the MBTA.
 
-This is a little mashup which takes that data and plots it on Google
-Maps. Choose a bus route from the pull down menu below and markers
-will appear with the latest locations of its buses. Red markers are
-inbound buses, blue markers are outbound buses. Markers will update
-with the latest information every 15 seconds.
+Visit https://joeshaw.org/mbta-bus to see it in action.
 
-It was built using Google App Engine and is about 50 lines of
-JavaScript and 50 lines of Python. Not bad.
-
-If you have any questions, comments, or pretty stylesheets, please
-feel free to email (joe@joeshaw.org) or tweet (@joeshaw) them to me.
-
-Joe Shaw, 14 November 2009
+This was once a standalone project but now is pulled into my blog via
+git submodules.
 

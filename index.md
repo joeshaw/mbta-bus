@@ -94,13 +94,27 @@ commuter rail, and ferry locations in addition to buses.
     var route_layer = null;
     var lines = [];
     var open_info_window = null;
+    var updateIntervalID = 0;
 
     populateRouteList();
 
     // Update the markers any time the option box is changed, or
-    // every 10 seconds.
+    // every 10 seconds as long as the window is visible.
     $("select").change(updateMarkers);
-    setInterval(updateMarkers, 10000);
+    if (!document.hidden) {
+      updateIntervalID = setInterval(updateMarkers, 10000);
+    }
+
+    function handleVisibilityChange() {
+      if (document.hidden && updateIntervalID) {
+        clearInterval(updateIntervalID);
+        updateIntervalID = 0;
+      } else if (!document.hidden && !updateIntervalID) {
+        updateMarkers();
+        updateIntervalID = setInterval(updateMarkers, 10000);
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibilityChange, false);
 
     function queryParams(qs) {
       qs = qs.split("+").join(" ");

@@ -65,7 +65,7 @@ commuter rail, and ferry locations in addition to buses.
     var map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
 
     var base_url = "https://joeshaw.org/mbta-bus/proxy/developer/api/v2";
-    var req_args = "api_key=kffsWT04w0iJdM7XhMlvwg&format=json";
+    var req_args = "api_key=K3oa39EuG0WuiQpsWZ9Duw&format=json";
 
     var direction_data = [
       { icon: "images/red-dot.png",

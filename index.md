@@ -1,19 +1,20 @@
 ---
-layout: page
+layout: single
 title: MBTA Google Maps mashup
 excerpt: Where's the bus? (or the subway, or the commuter rail, or the ferry)
 date: 2009-11-15T23:31:48-05:00
 tags: mbta bus maps mashup subway commuter ferry
-no_masthead: true
-pre_content: |
-  <div style="margin: 0 20px;">
-    <select id="option_list" style="margin: 10px 0;">
-      <option value="">Select Route</option>
-    </select>
-    <div id="map_canvas"></div>
-    <div id="marker_legend"></div>
-  </div>
 ---
+
+<div style="margin: 0 20px;">
+  <select id="option_list" style="margin: 10px 0;">
+    <option value="">Select Route</option>
+  </select>
+  <div id="map_canvas"></div>
+  <div id="marker_legend"></div>
+</div>
+
+## About
 
 The [MBTA](http://mbta.com/) provides a [real-time
 feed](http://realtime.mbta.com) of locations of vehicles on its bus,

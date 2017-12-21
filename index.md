@@ -236,7 +236,7 @@ commuter rail, and ferry locations in addition to buses.
       var marker = new google.maps.Marker({
         position: latlong,
         map: map,
-        icon: "http://www.nextmuni.com/googleMap/images/stopMarkerRed.gif"
+        icon: "https://www.nextmuni.com/googleMap/images/stopMarkerRed.gif"
       });
 
       marker.stop_id = stop.stop_id;

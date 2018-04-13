@@ -1,9 +1,9 @@
 ---
-layout: single
 title: MBTA Google Maps mashup
-excerpt: Where's the bus? (or the subway, or the commuter rail, or the ferry)
+description: Where's the bus? (or the subway, or the commuter rail, or the ferry)
 date: 2009-11-15T23:31:48-05:00
-tags: mbta bus maps mashup subway commuter ferry
+tags: [mbta, bus, maps, mashup, subway, commuter, ferry]
+layout: bus
 ---
 
 <div style="margin: 0 20px;">

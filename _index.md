@@ -43,7 +43,7 @@ updated periodically since then.  The latest update came on 13 July
 API to the MBTA's official v2 API.  This change brought in subway,
 commuter rail, and ferry locations in addition to buses.
 
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
 <script src="https://maps.google.com/maps/api/js?sensor=false" type="text/javascript"></script><script type="text/javascript">
   $(document).ready(function() {
     var useragent = navigator.userAgent;

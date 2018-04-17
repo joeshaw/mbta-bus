@@ -1,5 +1,5 @@
 ---
-title: MBTA Google Maps mashup
+title: MBTA Tracker
 description: Where's the bus? (or the subway, or the commuter rail, or the ferry)
 date: 2009-11-15T23:31:48-05:00
 tags: [mbta, bus, maps, mashup, subway, commuter, ferry]
@@ -7,11 +7,11 @@ layout: bus
 ---
 
 <div style="margin: 0 20px;">
-  <select id="option_list" style="margin: 10px 0;">
+  <select id="option_list" style="margin: 10px 0; font-size: 16px;">
     <option value="">Select Route</option>
   </select>
   <div id="map_canvas"></div>
-  <div id="marker_legend"></div>
+  <div id="marker_legend" style="margin: 10px 0;"></div>
 </div>
 
 ## About
@@ -49,19 +49,22 @@ commuter rail, and ferry locations in addition to buses.
     var useragent = navigator.userAgent;
     var map_canvas = document.getElementById("map_canvas");
 
-    if (useragent.indexOf('iPhone') != -1 || useragent.indexOf('Android') != -1 ) {
-      map_canvas.style.width = '100%';
-      map_canvas.style.height = '300px';
-    } else {
-      map_canvas.style.width = '100%';
-      map_canvas.style.height = '600px';
-    }
-
     var mapOptions = {
       zoom: 12,
       center: new google.maps.LatLng(42.357778, -71.061667),
-      mapTypeId: google.maps.MapTypeId.ROADMAP
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
     };
+
+    if (useragent.indexOf('iPhone') != -1 || useragent.indexOf('Android') != -1 ) {
+      map_canvas.style.width = '100%';
+      map_canvas.style.height = '300px';
+      mapOptions.gestureHandling = 'cooperative';
+    } else {
+      map_canvas.style.width = '100%';
+      map_canvas.style.height = '600px';
+      mapOptions.gestureHandling = 'greedy';
+    }
+
 
     var map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
 
@@ -311,7 +314,7 @@ commuter rail, and ferry locations in addition to buses.
     }
 
     function addLegend(icon, name) {
-      $("#marker_legend").append('<img src="' + icon + '">' + name);
+      $("#marker_legend").append('<img src="' + icon + '" style="display: inline">' + name);
     }
 
     function fetchVehicles(route_id) {

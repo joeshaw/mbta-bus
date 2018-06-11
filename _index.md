@@ -55,6 +55,6 @@ If you have any questions or comments, please feel free to
 [tweet](https://twitter.com/?status=@joeshaw%20) them to me.
 
 
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script type="text/javascript" src="js/vue.js"></script>
 <script type="text/javascript" src="js/vue-google-maps.js"></script>
 <script type="text/javascript" src="js/mbta-bus.js"></script>

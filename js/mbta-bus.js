@@ -165,7 +165,7 @@ const app = new Vue({
 
         openInfoWindowStop: function(stop) {
             this.infoWindowOpen = false;
-            fetch("https://api-v3.mbta.com/predictions?" + this.mbtaKeyParams + "filter[stop]=" + stop.id)
+            fetch("https://api-v3.mbta.com/predictions?" + this.mbtaKeyParams + "&filter[stop]=" + stop.id)
                 .then(response => response.json())
                 .then(json => {
                     this.infoOptions.pixelOffset.height = 0;

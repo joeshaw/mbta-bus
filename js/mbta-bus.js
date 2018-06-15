@@ -58,7 +58,7 @@ const app = new Vue({
             "images/orange-dot.png",
             "images/purple-dot.png"
         ],
-        mbtaKey: "5e5bb76ad00f4a608cf6cf70ccd8e12d"
+        mbtaKeyParams: "api_key=5e5bb76ad00f4a608cf6cf70ccd8e12d"
     },
     methods: {
         displayName: function(route) {
@@ -71,12 +71,12 @@ const app = new Vue({
             if (this.selectedRoute === null) {
                 return;
             }
-            fetch("https://api-v3.mbta.com/stops?filter[route]=" + this.selectedRoute.id + "&api_key=" + this.mbtaKey)
+            fetch("https://api-v3.mbta.com/stops?" + this.mbtaKeyParams + "&filter[route]=" + this.selectedRoute.id)
                 .then(response => response.json())
                 .then(json => {
                     this.stops = json.data;
                 });
-            fetch("https://api-v3.mbta.com/shapes?filter[route]=" + this.selectedRoute.id + "&api_key=" + this.mbtaKey)
+            fetch("https://api-v3.mbta.com/shapes?" + this.mbtaKeyParams + "&filter[route]=" + this.selectedRoute.id)
                 .then(response => response.json())
                 .then(json => {
                     this.shapes = json.data;
@@ -98,7 +98,7 @@ const app = new Vue({
             if (this.selectedRoute === null) {
                 return;
             }
-            fetch("https://api-v3.mbta.com/vehicles?filter[route]=" + this.selectedRoute.id + "&include=trip&api_key=" + this.mbtaKey)
+            fetch("https://api-v3.mbta.com/vehicles?" + this.mbtaKeyParams + "&filter[route]=" + this.selectedRoute.id + "&include=trip")
                 .then(response => response.json())
                 .then(json => {
                     this.vehicles = json.data;
@@ -165,7 +165,7 @@ const app = new Vue({
 
         openInfoWindowStop: function(stop) {
             this.infoWindowOpen = false;
-            fetch("https://api-v3.mbta.com/predictions?filter[stop]=" + stop.id + "&api_key=" + this.mbtaKey)
+            fetch("https://api-v3.mbta.com/predictions?" + this.mbtaKeyParams + "filter[stop]=" + stop.id)
                 .then(response => response.json())
                 .then(json => {
                     this.infoOptions.pixelOffset.height = 0;
@@ -197,13 +197,34 @@ const app = new Vue({
                     this.infoWindowOpen = true;
                 });
         },
+
+        queryParams: function() {
+            qs = document.location.search.split("+").join(" ");
+            var params = {};
+            var regexp = /[?&]?([^=]+)=([^&]*)/g;
+            var tokens;
+            while (tokens = regexp.exec(qs)) {
+                params[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2])
+            }
+            return params;
+        },
     },
     created () {
-        fetch("https://api-v3.mbta.com/routes?api_key=" + this.mbtaKey)
+        fetch("https://api-v3.mbta.com/routes?" + this.mbtaKeyParams)
             .then(response => response.json())
             .then(json => {
                 this.routes = json.data;
             })
+            .then(() => {
+                var params = this.queryParams();
+                var r = this.routes.find(function(r) {
+                    return r.id === params.route;
+                });
+                if (r !== undefined) {
+                    this.selectedRoute = r;
+                    this.routeChanged();
+                }
+            });
     },
     mounted: function() {
         this.visibilityChanged();

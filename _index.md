@@ -14,7 +14,6 @@ layout: bus
         </option>
     </select>
     <gmap-map :center="center" :zoom="12" :style="style" ref="map">
-        <!--<gmap-kml-layer :url="kmlURL" :clickable="false"></gmap-kml-layer>-->
         <gmap-polyline v-for="shape in shapes" :path="getPath(shape)" :key="shape.id" :options="polylineOptions"></gmap-polyline>
         <gmap-info-window :options="infoOptions" :position="infoWindowPosition" :opened="infoWindowOpen" @closeclick="infoWindowOpen=false"><span v-html="infoWindowContent"></span></gmap-info-window>
         <gmap-marker v-for="stop in stops" :key="stop.id" :position="position(stop)" :clickable="true" @click="openInfoWindowStop(stop)" icon="/mbta-bus/images/stop-marker.gif"></gmap-marker>

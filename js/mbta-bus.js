@@ -114,7 +114,7 @@ const app = new Vue({
                 clearInterval(this.intervalID);
                 this.intervalID = 0;
             } else if (!document.hidden && this.intervalID == 0) {
-                this.routeChanged();
+                this.updateVehicles();
                 this.intervalID = setInterval(() => {
                     this.updateVehicles();
                 }, 10000);
@@ -168,7 +168,7 @@ const app = new Vue({
             fetch("https://api-v3.mbta.com/predictions?" + this.mbtaKeyParams + "&filter[stop]=" + stop.id)
                 .then(response => response.json())
                 .then(json => {
-                    this.infoOptions.pixelOffset.height = 0;
+                    this.infoOptions.pixelOffset.height = -10;
                     this.infoWindowContent = "<h3>" + stop.attributes.name + "</h3>";
                     var predictions = json.data.filter(
                         (p) => p.relationships.route.data.id === this.selectedRoute.id

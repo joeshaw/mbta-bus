@@ -62,9 +62,10 @@ const app = new Vue({
     },
     methods: {
         displayName: function(route) {
-            return route.attributes.long_name.length > 0 ?
-                route.attributes.long_name :
-                route.attributes.short_name;
+            if (route.attributes.short_name.length > 0) {
+                return route.attributes.short_name + " – " + route.attributes.long_name;
+            }
+            return route.attributes.long_name;
         },
 
         routeChanged: function(event) {

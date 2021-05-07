@@ -48,6 +48,9 @@ const app = new Vue({
         },
         options: {
             gestureHandling: gestureHandling,
+            mapTypeControl: false,
+            streetViewControl: false,
+            clickableIcons: false
         },
         style: style,
         markerIcons: [

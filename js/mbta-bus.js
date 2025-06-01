@@ -416,6 +416,21 @@ function onRouteChange() {
     refreshTimer = setInterval(() => updateVehicles(routeId), refreshInterval);
 }
 
+function handleVisibilityChange() {
+    const select = document.getElementById('route-select');
+    const routeId = select.value;
+    
+    if (document.hidden && refreshTimer) {
+        // Page is hidden, pause updates
+        clearInterval(refreshTimer);
+        refreshTimer = null;
+    } else if (!document.hidden && !refreshTimer && routeId) {
+        // Page is visible and we have a route selected, resume updates
+        updateVehicles(routeId);
+        refreshTimer = setInterval(() => updateVehicles(routeId), refreshInterval);
+    }
+}
+
 // Google Maps async callback entrypoint
 window.initMap = async function() {
     const isMobile = /iPhone|Android/i.test(navigator.userAgent);
@@ -435,4 +450,7 @@ window.initMap = async function() {
     });
     await loadRoutes();
     document.getElementById('route-select').addEventListener('change', onRouteChange);
+    
+    // Add page visibility API event listener
+    document.addEventListener('visibilitychange', handleVisibilityChange, false);
 };

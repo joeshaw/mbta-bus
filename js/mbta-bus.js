@@ -453,4 +453,16 @@ window.initMap = async function() {
     
     // Add page visibility API event listener
     document.addEventListener('visibilitychange', handleVisibilityChange, false);
+    
+    // Check URL parameters for deep linking
+    const params = new URLSearchParams(window.location.search);
+    const routeId = params.get('route');
+    if (routeId) {
+        const select = document.getElementById('route-select');
+        const routeOption = Array.from(select.options).find(option => option.value === routeId);
+        if (routeOption) {
+            select.value = routeId;
+            onRouteChange(); // Manually trigger since programmatic value change doesn't fire event
+        }
+    }
 };
